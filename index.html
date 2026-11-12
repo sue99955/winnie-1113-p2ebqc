@@ -1,0 +1,954 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>熊宝宝年度报告</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&family=Press+Start+2P&family=ZCOOL+QingKe+HuangYou&display=swap">
+<style>
+/* A tap-through story, one full screen per page. Each illustrated page is a pixel-art scene
+   whose plain sky holds the words; photo pages are pixel-framed collages on a gridded ground.
+   Left half of the screen goes back, right half goes forward. Single light look on purpose. */
+:root {
+  --plum: #3B2A3F;
+  --plum-2: #5E4B63;
+  --paper: #FFFDF8;
+  --coral: #E2675A;
+  --violet: #7464E6;
+  --butter: #F6E9BF;
+  --backdrop: #E8E4F4;
+  --head: "ZCOOL QingKe HuangYou", "PingFang SC", "Hiragino Sans GB", sans-serif;
+  --body: "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", sans-serif;
+  --pix: "Press Start 2P", "Courier New", monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--backdrop); color: var(--plum); font-family: var(--body); font-size: 16px; line-height: 1.6;
+  display: grid; place-items: center; overflow: hidden; }
+.phone { position: relative; width: 100%; height: 100%; overflow: hidden; background: #D2CFFB; user-select: none; -webkit-user-select: none; }
+@media (min-width: 560px) { .phone { width: 420px; height: min(100% - 32px, 880px); border-radius: 28px; box-shadow: 0 30px 60px -20px rgba(59, 42, 63, .4); } }
+
+/* pixel corners: a box with notched corners drawn by four hard shadows */
+.px { background: var(--paper); box-shadow: 0 -3px 0 0 var(--plum), 0 3px 0 0 var(--plum), -3px 0 0 0 var(--plum), 3px 0 0 0 var(--plum), 0 7px 0 0 rgba(59, 42, 63, .25); }
+
+/* progress + language */
+.bar { position: absolute; z-index: 9; top: 0; left: 0; right: 0; display: flex; gap: 3px;
+  padding: calc(12px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px)); }
+.bar i { position: relative; flex: 1; height: 5px; background: rgba(59, 42, 63, .18); cursor: pointer; transition: transform .12s; }
+.bar i::after { content: ""; position: absolute; inset: -12px -1px -12px -1px; }
+.bar i:hover { transform: scaleY(1.8); }
+.bar i.done { background: var(--plum); }
+.lang { position: absolute; z-index: 10; top: calc(26px + env(safe-area-inset-top, 0px)); right: max(16px, env(safe-area-inset-right, 0px));
+  font: inherit; font-family: var(--pix); font-size: 11px; color: var(--plum); border: 0; padding: 7px 9px; cursor: pointer; }
+.music { position: absolute; z-index: 10; top: calc(26px + env(safe-area-inset-top, 0px)); right: calc(max(16px, env(safe-area-inset-right, 0px)) + 50px);
+  font: inherit; font-size: 15px; font-weight: 700; color: var(--plum); border: 0; padding: 4px 9px; cursor: pointer; line-height: 1.4; }
+.music.off { opacity: .45; text-decoration: line-through; }
+.music:focus-visible, .lang:focus-visible, .pbtn:focus-visible, .opt:focus-visible { outline: 3px solid var(--violet); outline-offset: 4px; }
+
+/* slides */
+.slide { position: absolute; inset: 0; overflow: hidden; opacity: 0; visibility: hidden; transform: scale(1.04); filter: blur(6px);
+  transition: opacity .45s ease, transform .45s ease, filter .45s ease, visibility 0s .45s; background: var(--sky, #D2CFFB); }
+.slide.on { opacity: 1; visibility: visible; transform: none; filter: none; transition: opacity .45s ease, transform .45s ease, filter .45s ease; }
+.slide.back { transform: scale(.96); }
+.stage { position: absolute; z-index: 1; left: 0; right: 0; bottom: 0; width: 100%; aspect-ratio: 572 / 1024; }
+.stage > img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+.copy { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 8px;
+  padding: calc(56px + env(safe-area-inset-top, 0px)) max(22px, env(safe-area-inset-right, 0px)) 0 max(22px, env(safe-area-inset-left, 0px)); }
+/* on illustrated pages the words sit on their own pixel card so the scene never runs into them */
+.slide:not(.photos) .copy { margin: calc(66px + env(safe-area-inset-top, 0px)) 14px 0; padding: 14px 16px 16px; background: rgba(255, 253, 248, .94);
+  box-shadow: 0 -3px 0 0 var(--plum), 0 3px 0 0 var(--plum), -3px 0 0 0 var(--plum), 3px 0 0 0 var(--plum), 0 7px 0 0 rgba(59, 42, 63, .25); }
+.dark .copy { color: var(--paper); }
+.slide.dark .copy { background: rgba(43, 34, 62, .94); box-shadow: 0 -3px 0 0 var(--paper), 0 3px 0 0 var(--paper), -3px 0 0 0 var(--paper), 3px 0 0 0 var(--paper); }
+
+.in { opacity: 0; }
+.on .in { animation: rise .6s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--d, 0) * 1s); }
+@keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+
+.kick { font-size: 15px; font-weight: 700; color: var(--plum-2); }
+.dark .kick { color: #D8D0F5; }
+h1, h2 { font-family: var(--head); font-weight: 400; margin: 0; line-height: 1.2; letter-spacing: .02em; text-wrap: balance; }
+h1 { font-size: 40px; }
+h2 { font-size: 30px; }
+[lang-en] h1, [lang-en] h2 { letter-spacing: 0; }
+[lang-en] h1 { font-size: 30px; }
+.say { font-size: 16px; line-height: 1.7; margin: 0; }
+.num { font-family: var(--pix); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.row { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+.big { font-family: var(--head); font-size: 62px; line-height: 1; }
+.times { font-size: 15px; font-weight: 700; margin-left: 4px; }
+
+/* buttons and bubbles */
+.pbtn { font: inherit; font-weight: 700; font-size: 15px; color: var(--plum); border: 0; padding: 9px 16px; cursor: pointer; align-self: flex-start; transition: transform .1s; }
+.pbtn:active { transform: translateY(3px); }
+.pbtn.solid { background: var(--plum); color: var(--paper); box-shadow: 0 -3px 0 0 var(--plum), 0 3px 0 0 var(--plum), -3px 0 0 0 var(--plum), 3px 0 0 0 var(--plum), 0 7px 0 0 rgba(59, 42, 63, .25); }
+.toast { font-size: 15px; font-weight: 700; color: var(--coral); min-height: 1.6em; margin: 0; }
+.dark .toast { color: #FFC9A8; }
+.bubble { position: absolute; z-index: 3; transform: translate(-50%, -100%); font: inherit; font-size: 15px; font-weight: 700; color: var(--plum);
+  border: 0; padding: 8px 12px; max-width: 74%; width: max-content; text-align: center; line-height: 1.4; cursor: pointer; }
+.bubble::after { content: ""; position: absolute; left: 50%; bottom: -12px; width: 10px; height: 9px; margin-left: -5px; background: var(--paper);
+  box-shadow: -3px 0 0 0 var(--plum), 3px 0 0 0 var(--plum), 0 3px 0 0 var(--plum); }
+.pulse { animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { transform: translate(-50%, -100%) scale(1); } 50% { transform: translate(-50%, -100%) scale(1.08); } }
+.hop { animation: hop .5s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes hop { 40% { transform: translate(-50%, -112%) scale(1.06); } }
+
+.ripple { position: absolute; z-index: 8; pointer-events: none; width: 0; height: 0; }
+.ripple i { position: absolute; width: 7px; height: 7px; margin: -3px; animation: burst .55s steps(5) forwards; }
+@keyframes burst { to { transform: translate(var(--x), var(--y)); opacity: 0; } }
+
+/* 哈哈 */
+.haha-zone { position: absolute; inset: 0; z-index: 4; pointer-events: none; overflow: hidden; }
+.haha-zone span { position: absolute; bottom: -40px; font-family: var(--head); color: var(--plum); background: var(--paper); padding: 2px 10px; white-space: nowrap;
+  box-shadow: 0 -2px 0 0 var(--plum), 0 2px 0 0 var(--plum), -2px 0 0 0 var(--plum), 2px 0 0 0 var(--plum); animation: float 4.6s linear forwards; }
+.haha-zone span.boom { bottom: auto; animation: boom 1.2s ease-out forwards; }
+@keyframes float { from { transform: translateY(0); opacity: 0; } 12% { opacity: 1; } 85% { opacity: 1; } to { transform: translateY(-620px); opacity: 0; } }
+@keyframes boom { from { transform: translate(0, 0) scale(.4); opacity: 1; } to { transform: translate(var(--x), var(--y)) scale(1.1); opacity: 0; } }
+
+/* boss vs babe */
+.vs { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; text-align: center; gap: 6px; }
+.vs .w { font-family: var(--head); font-size: 22px; }
+.vs .num { font-size: 26px; }
+.vs .x { font-family: var(--pix); font-size: 12px; color: var(--plum-2); }
+
+/* funnel */
+.funnel { display: grid; gap: 5px; padding: 10px 12px; }
+.funnel div { display: flex; justify-content: space-between; gap: 8px; padding: 4px 10px; font-size: 14px; font-weight: 700; color: var(--paper); margin: 0 auto; }
+.funnel .f1 { width: 100%; background: #7E9CD6; } .funnel .f2 { width: 88%; background: #E3AE4A; color: var(--plum); } .funnel .f3 { width: 70%; background: var(--coral); justify-content: center; font-family: var(--pix); font-size: 13px; }
+
+/* lucky coins */
+.coin { position: absolute; z-index: 2; width: 14px; height: 14px; background: #F2C14E; pointer-events: none;
+  box-shadow: inset -3px -3px 0 0 #C98F22, inset 3px 3px 0 0 #FFE59A, 0 0 0 2px #7A4E12; animation: fall 1.6s steps(12) forwards; }
+.coin.env { width: 12px; height: 16px; background: #E2483C; box-shadow: inset 0 4px 0 0 #B7322A, 0 0 0 2px #6E1B16; }
+@keyframes fall { from { transform: translateY(0) rotate(0); opacity: 1; } 80% { opacity: 1; } to { transform: translateY(var(--fall)) rotate(180deg); opacity: 0; } }
+
+/* stamps */
+.stamp { position: absolute; z-index: 3; pointer-events: none; font-family: var(--head); color: var(--coral); border: 4px solid var(--coral); border-radius: 50%;
+  width: 78px; height: 78px; display: grid; place-items: center; font-size: 22px; opacity: .85; animation: stamp .28s steps(4) both; }
+@keyframes stamp { from { transform: scale(2) rotate(var(--r)); opacity: 0; } to { transform: scale(1) rotate(var(--r)); opacity: .85; } }
+
+/* photo pages */
+.photos { --sky: #F4EEF9; background-color: var(--sky);
+  background-image: linear-gradient(rgba(116, 100, 230, .07) 2px, transparent 2px), linear-gradient(90deg, rgba(116, 100, 230, .07) 2px, transparent 2px);
+  background-size: 22px 22px; }
+.photos.p2 { --sky: #EEF5F9; } .photos.p3 { --sky: #FBF1EA; } .photos.p4 { --sky: #F3F8EE; } .photos.p5 { --sky: #FBF6E6; }
+.photos .copy { height: 100%; padding-bottom: calc(22px + env(safe-area-inset-bottom, 0px)); }
+.stack { position: relative; flex: 1; min-height: 0; margin: 4px 0; cursor: pointer; }
+.ph { position: absolute; inset: 0; margin: auto; width: fit-content; height: fit-content; padding: 7px 7px 0; background: var(--paper);
+  box-shadow: 0 -3px 0 0 var(--plum), 0 3px 0 0 var(--plum), -3px 0 0 0 var(--plum), 3px 0 0 0 var(--plum), 0 8px 0 0 rgba(59, 42, 63, .22);
+  transform: translate(var(--tx, 0), var(--ty, 0)) rotate(var(--r, 0deg)); transition: transform .55s cubic-bezier(.3, 1.3, .5, 1), opacity .4s; }
+.ph img { display: block; max-width: var(--mw, 300px); max-height: var(--mh, 400px); width: auto; height: auto; pointer-events: none; }
+.ph figcaption { font-size: 14px; font-weight: 700; line-height: 1.35; padding: 6px 2px 8px; text-align: center; max-width: var(--mw, 300px); }
+.ph:not(:has(figcaption)) { padding-bottom: 7px; }
+.ph.out { transform: translate(130%, -8%) rotate(18deg); opacity: 0; transition: transform .5s cubic-bezier(.5, 0, .7, .4), opacity .45s; }
+.count { position: absolute; right: 0; bottom: -4px; z-index: 30; font-family: var(--pix); font-size: 11px; color: var(--plum); background: var(--paper); padding: 5px 7px;
+  box-shadow: 0 -2px 0 0 var(--plum), 0 2px 0 0 var(--plum), -2px 0 0 0 var(--plum), 2px 0 0 0 var(--plum); }
+.sticker { position: absolute; z-index: 3; width: 64px; height: auto; image-rendering: pixelated; pointer-events: none; }
+
+/* quiz */
+.lvl { font-size: 14px; font-weight: 700; color: var(--plum-2); }
+.q { font-family: var(--head); font-size: 24px; line-height: 1.3; margin: 0; }
+.opts { display: grid; gap: 12px; padding: 4px 3px 0; }
+.opt { font: inherit; font-size: 15px; font-weight: 700; color: var(--plum); text-align: left; border: 0; padding: 10px 14px; cursor: pointer; display: flex; gap: 10px; align-items: center; }
+.opt::before { content: ""; width: 14px; height: 14px; flex: none; background: var(--paper); box-shadow: inset 0 0 0 3px var(--plum); }
+.opt.yes { background: #E7E2FF; } .opt.yes::before { background: var(--violet); }
+.opt.no { background: #FFE3DE; animation: shake .35s steps(4); }
+@keyframes shake { 25% { transform: translateX(-6px); } 50% { transform: translateX(6px); } 75% { transform: translateX(-3px); } }
+.fb { font-size: 15px; font-weight: 700; min-height: 1.6em; margin: 0; }
+.fb.no { color: var(--coral); } .fb.yes { color: var(--violet); }
+
+/* gift */
+/* the code is never written on the page: Winnie fills the blanks from clues only she can answer */
+.code-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 3px; margin: 2px 3px 0; }
+.slot { display: grid; justify-items: center; gap: 3px; }
+.slot small { font-family: var(--pix); font-size: 9px; color: var(--plum-2); }
+.cell { width: 28px; height: 34px; border: 0; padding: 0; text-align: center; font-family: var(--pix); font-size: 14px; color: var(--plum); text-transform: uppercase; display: grid; place-items: center; }
+input.cell { background: #EEE9FF; caret-color: var(--violet); }
+input.cell:focus { outline: none; background: #FFF4C9; }
+.cell.fixed { background: var(--paper); }
+.dash { font-family: var(--pix); font-size: 14px; padding-bottom: 10px; }
+.clues { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 3px; font-size: 14px; line-height: 1.45; }
+.clues li { display: flex; gap: 8px; align-items: baseline; }
+.clues b { font-family: var(--pix); font-size: 10px; color: var(--violet); flex: none; width: 14px; }
+.note { font-size: 14px; color: var(--plum-2); margin: 0; }
+.btnrow { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 4px; }
+
+/* end */
+.blown .stage > img { filter: brightness(.72) saturate(.9); transition: filter 1.2s; }
+.sign { font-family: var(--head); font-size: 26px; margin: 0; }
+.wish { display: grid; gap: 6px; }
+.wish[hidden] { display: none; }
+
+.navhint { font-size: 14px; font-weight: 700; color: var(--plum-2); }
+.again-hint { position: absolute; z-index: 9; font-size: 14px; font-weight: 700; color: var(--plum); padding: 3px 8px; pointer-events: none; white-space: nowrap;
+  transform: translate(-50%, -100%); animation: againup 1.6s ease-out forwards; }
+@keyframes againup { 0% { opacity: 0; transform: translate(-50%, -70%); } 15% { opacity: 1; transform: translate(-50%, -100%); } 75% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -190%); } }
+.on .stage > img { animation: drift 9s ease-in-out infinite alternate; transform-origin: 50% 100%; }
+@keyframes drift { to { transform: scale(1.04); } }
+#confetti { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 7; }
+
+@media (prefers-reduced-motion: reduce) {
+  .slide { filter: none !important; transform: none !important; }
+  .on .in, .pulse, .on .stage > img { animation: none !important; opacity: 1; }
+  .ph { transition: none; }
+  .haha-zone { display: none; }
+}
+@media (max-height: 700px) { h1 { font-size: 32px; } h2 { font-size: 25px; } .big { font-size: 48px; } .say { font-size: 15px; } .q { font-size: 21px; } .copy { gap: 6px; } }
+</style>
+<meta name="description" content="Winnie 的生日限定报告">
+<style>[hidden]{display:none!important} :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)} body{margin:0}</style>
+</head>
+<body>
+
+<div class="phone" id="phone">
+  <div class="bar" id="bar"></div>
+  <button class="lang px" id="lang" type="button" aria-label="切换语言 Switch language">EN</button>
+  <button class="music px" id="music" type="button" aria-label="音乐开关 Music on or off">♪</button>
+
+  <!-- P1 cover -->
+  <section class="slide" style="--sky:#D2CFFB">
+    <div class="stage"><img src="gen/cover.jpg" alt="戴墨镜和派对帽的小熊在生日派对房间里，兔子从旁边探头">
+      <button class="bubble px pulse" id="cover-bubble" type="button" data-tap style="left:54%;top:64%" data-i="tapme"></button>
+    </div>
+    <div class="copy">
+      <p class="kick in" style="--d:.05" data-i="p1k"></p>
+      <h1 class="in" style="--d:.15" data-i="p1t"></h1>
+      <p class="say in" style="--d:.3" data-i="p1s"></p>
+      <div class="btnrow in" style="--d:.45"><button class="pbtn solid" type="button" data-go="next" data-i="start"></button><span class="navhint" data-i="navhint"></span></div>
+    </div>
+  </section>
+
+  <!-- P2 met -->
+  <section class="slide" style="--sky:#D5E5F2">
+    <div class="stage"><img src="gen/meet.jpg" alt="秋天的悉尼街角，小熊和兔子拿奶茶碰杯">
+      <button class="bubble px pulse" id="cheers" type="button" data-tap style="left:50%;top:62%" data-i="cheersBtn"></button>
+    </div>
+    <div class="copy">
+      <p class="kick in" style="--d:.05" data-i="p2k"></p>
+      <h2 class="in" style="--d:.15" data-i="p2t"></h2>
+      <p class="say in" style="--d:.3" data-i="p2s"></p>
+    </div>
+  </section>
+
+  <!-- P3 days -->
+  <section class="slide" style="--sky:#C9E5D5">
+    <div class="stage"><img src="gen/path.jpg" alt="小熊和兔子手拉手走过一条经过烤肉、酒吧、婚纱店、海边、圣诞树、婚礼和球场的小路"></div>
+    <div class="copy">
+      <p class="kick in" style="--d:.05" data-i="p3k"></p>
+      <div class="num in" style="--d:.15;font-size:40px" data-count="4200" data-suffix="+">4,200+</div>
+      <h2 class="in" style="--d:.3" data-i="p3t"></h2>
+      <p class="say in" style="--d:.45" data-i="p3s"></p>
+    </div>
+  </section>
+
+  <!-- P4 words intro -->
+  <section class="slide" style="--sky:#DDD9FD">
+    <div class="stage"><img src="gen/phone.jpg" alt="小熊和兔子坐在一部巨大的手机上，周围飘满聊天气泡"></div>
+    <div class="copy">
+      <h2 class="in" style="--d:.1" data-i="p4t"></h2>
+      <p class="say in" style="--d:.3" data-i="p4s"></p>
+    </div>
+  </section>
+
+  <!-- P5 haha -->
+  <section class="slide" style="--sky:#F2E9BE" data-haha>
+    <div class="haha-zone" id="haha-zone"></div>
+    <div class="stage"><img src="gen/sofa.jpg" alt="小熊和兔子躺在沙发上笑到流泪，手机里飘出很多聊天气泡"></div>
+    <div class="copy">
+      <p class="kick in" style="--d:.05" data-i="p5k"></p>
+      <div class="row in" style="--d:.15"><span class="big" data-i="p5w"></span><span class="num" style="font-size:26px" data-count="3491">3,491</span><span class="times" data-i="times"></span></div>
+      <p class="say in" style="--d:.3" data-i="p5s"></p>
+      <button class="pbtn px in" style="--d:.45" type="button" id="haha-btn" data-i="p5b"></button>
+      <p class="toast" id="haha-toast" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <!-- P6 buy -->
+  <section class="slide" style="--sky:#FBD6BC">
+    <div class="stage"><img src="gen/shop.jpg" alt="小熊和兔子提着一堆购物袋，空钱包长着翅膀飞走"></div>
+    <div class="copy">
+      <p class="kick in" style="--d:.05" data-i="p6k"></p>
+      <div class="row in" style="--d:.15"><span class="big" data-i="p6w"></span><span class="num" style="font-size:26px" data-count="338">338</span><span class="times" data-i="times"></span></div>
+      <p class="say in" style="--d:.3" data-i="p6s"></p>
+      <button class="pbtn solid in" style="--d:.45" type="button" id="cart-btn" data-i="p6b"></button>
+      <p class="toast" id="cart-toast" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <!-- P7 lol -->
+  <section class="slide" style="--sky:#D5D4FB">
+    <div class="stage" id="lucky-stage"><img src="gen/lucky.jpg" alt="小熊抱着金元宝笑到在空中打滚，金币和红包落下来，兔子拿红袋子接">
+      <button class="bubble px pulse" id="angel" type="button" data-tap style="left:70%;top:47%" data-i="p7b"></button>
+    </div>
+    <div class="copy">
+      <p class="kick in" style="--d:.05" data-i="p7k"></p>
+      <div class="row in" style="--d:.15"><span class="big" data-i="p7w"></span><span class="num" style="font-size:26px" data-count="227">227</span><span class="times" data-i="times"></span></div>
+      <p class="say in" style="--d:.3" data-i="p7s"></p>
+    </div>
+  </section>
+
+  <!-- P8 boss vs babe -->
+  <section class="slide" style="--sky:#D3E3F2">
+    <div class="stage"><img src="gen/office.jpg" alt="上半部分小熊在办公桌前加班，下半部分小熊和兔子在爱心下拥抱"></div>
+    <div class="copy">
+      <h2 class="in" style="--d:.05" data-i="p8t"></h2>
+      <div class="vs in" style="--d:.15">
+        <div><div class="w" data-i="boss"></div><div class="num" data-count="177">177</div></div>
+        <div class="x">VS</div>
+        <div><div class="w" data-i="babe"></div><div class="num" id="baby-n">61</div></div>
+      </div>
+      <p class="say in" style="--d:.3" data-i="p8s"></p>
+      <button class="pbtn solid in" style="--d:.4" type="button" id="baby-btn" data-i="p8b"></button>
+      <p class="toast" id="baby-toast" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <!-- P9 weekend and meals -->
+  <section class="slide" style="--sky:#D2E9DD">
+    <div class="stage"><img src="gen/dinner.jpg" alt="小熊和兔子在餐厅里吃火锅、饺子和牛排，碰杯"></div>
+    <div class="copy">
+      <h2 class="in" style="--d:.05" data-i="p9t"></h2>
+      <div class="funnel in" style="--d:.2;padding:4px 0">
+        <div class="f1"><span data-i="f1"></span><span class="num">77</span></div>
+        <div class="f2"><span data-i="f2"></span><span class="num">75</span></div>
+        <div class="f3">97%</div>
+      </div>
+      <p class="say in" style="--d:.35" data-i="p9s"></p>
+    </div>
+  </section>
+
+  <!-- P10 ok -->
+  <section class="slide" style="--sky:#F4E9C1">
+    <div class="stage" id="ok-stage"><img src="gen/stamp.jpg" alt="兔子拿着大印章在盖章，小熊竖大拇指">
+      <button class="bubble px pulse" id="ok-btn" type="button" data-tap style="left:56%;top:52%" data-i="p10b"></button>
+    </div>
+    <div class="copy">
+      <div class="row in" style="--d:.1"><span class="big" data-i="p10w"></span><span class="num" style="font-size:26px" data-count="207">207</span><span class="times" data-i="times"></span></div>
+      <p class="say in" style="--d:.25" data-i="p10s"></p>
+    </div>
+  </section>
+
+  <section class="slide photos ">
+    <div class="copy">
+      <h2 class="in" style="--d:.05" data-i="p11t"></h2>
+      <div class="stack in" style="--d:.15" data-tap>
+        <figure class="ph"><img src="img/p00.jpg" alt="烤肉店里夹肉的 Winnie"><figcaption data-i="c11a"></figcaption></figure><figure class="ph"><img src="img/p02.jpg" alt="戴鸭舌帽拿着鸡尾酒的 Winnie"><figcaption data-i="c11b"></figcaption></figure><figure class="ph"><img src="img/p05.jpg" alt="穿花外套的 Winnie"><figcaption>2021.2</figcaption></figure><figure class="ph"><img src="img/p06.jpg" alt="Winnie 抱着戴墨镜的泰迪熊"><figcaption>2022.11</figcaption></figure>
+        <span class="count"></span>
+      </div>
+      <p class="say in" style="--d:.3" data-i="p11s"></p>
+    </div>
+    <img class="sticker" src="gen/bear_wave.png" alt="" style="right:12px;top:calc(40px + env(safe-area-inset-top, 0px));width:50px">
+  </section>
+
+  <section class="slide photos p2">
+    <div class="copy">
+      <div class="stack in" style="--d:.15" data-tap>
+        <figure class="ph"><img src="img/p13.jpg" alt="两个人在悉尼歌剧院前合照"><figcaption data-i="c12a"></figcaption></figure><figure class="ph"><img src="img/p17.jpg" alt="两个人比耶自拍"><figcaption data-i="c12b"></figcaption></figure>
+        <span class="count"></span>
+      </div>
+      <p class="say in" style="--d:.3" data-i="p12s"></p>
+    </div>
+  </section>
+
+  <section class="slide photos p3">
+    <div class="copy">
+      <h2 class="in" style="--d:.05" data-i="p13t"></h2>
+      <div class="stack in" style="--d:.15" data-tap>
+        <figure class="ph"><img src="img/p24.jpg" alt="Winnie 穿着婚纱大笑"><figcaption data-i="c13a"></figcaption></figure><figure class="ph"><img src="img/p29.jpg" alt="Winnie 在另一家店试婚纱"><figcaption data-i="c13b"></figcaption></figure><figure class="ph"><img src="img/p32.jpg" alt="Winnie 试妆"><figcaption>2024.6</figcaption></figure><figure class="ph"><img src="img/p28.jpg" alt="试完婚纱去吃饭"><figcaption>2024.5</figcaption></figure>
+        <span class="count"></span>
+      </div>
+      <p class="say in" style="--d:.3" data-i="p13s"></p>
+    </div>
+    <img class="sticker" src="gen/bunny_happy.png" alt="" style="right:12px;top:calc(40px + env(safe-area-inset-top, 0px));width:42px">
+  </section>
+
+  <section class="slide photos p2">
+    <div class="copy">
+      <h2 class="in" style="--d:.05" data-i="p14t"></h2>
+      <div class="stack in" style="--d:.15" data-tap>
+        <figure class="ph"><img src="img/p41.jpg" alt="两个人在餐厅大笑"><figcaption data-i="c14a"></figcaption></figure><figure class="ph"><img src="img/p38.jpg" alt="夜晚海边的合照"><figcaption data-i="c14b"></figcaption></figure>
+        <span class="count"></span>
+      </div>
+      <p class="say in" style="--d:.3" data-i="p14s"></p>
+    </div>
+  </section>
+
+  <section class="slide photos p4">
+    <div class="copy">
+      <div class="stack in" style="--d:.15" data-tap>
+        <figure class="ph"><img src="img/p47.jpg" alt="Winnie 和生日蛋糕"><figcaption data-i="c15a"></figcaption></figure><figure class="ph"><img src="img/p50.jpg" alt="圣诞树前的合照"><figcaption data-i="c15b"></figcaption></figure>
+        <span class="count"></span>
+      </div>
+      <p class="say in" style="--d:.3" data-i="p15s"></p>
+    </div>
+  </section>
+
+  <section class="slide photos p3">
+    <div class="copy">
+      <h2 class="in" style="--d:.05" data-i="p16t"></h2>
+      <div class="stack in" style="--d:.15" data-tap>
+        <figure class="ph"><img src="img/p60.jpg" alt="戴着 bride to be 绶带的合照"><figcaption data-i="c16a"></figcaption></figure><figure class="ph"><img src="img/p69.jpg" alt="婚礼当天化完妆的 Winnie"><figcaption data-i="c16b"></figcaption></figure><figure class="ph"><img src="img/p73.jpg" alt="婚礼切蛋糕"><figcaption data-i="c16c"></figcaption></figure>
+        <span class="count"></span>
+      </div>
+      <p class="say in" style="--d:.3" data-i="p16s"></p>
+    </div>
+    <img class="sticker" src="gen/bunny_wave.png" alt="" style="right:12px;top:calc(40px + env(safe-area-inset-top, 0px));width:40px">
+  </section>
+
+  <section class="slide photos p5">
+    <div class="copy">
+      <div class="stack in" style="--d:.15" data-tap>
+        <figure class="ph"><img src="img/p75.jpg" alt="嘟嘴自拍"><figcaption data-i="c17a"></figcaption></figure><figure class="ph"><img src="img/p77.jpg" alt="两个人戴蓝色渔夫帽在球场自拍"><figcaption data-i="c17b"></figcaption></figure><figure class="ph"><img src="img/p83.jpg" alt="两个人在餐厅合照"><figcaption data-i="c17c"></figcaption></figure>
+        <span class="count"></span>
+      </div>
+      <p class="say in" style="--d:.3" data-i="p17s"></p>
+    </div>
+  </section>
+
+  <!-- quiz slides are inserted here by script -->
+
+  <!-- gift -->
+  <section class="slide" id="gift" style="--sky:#FBD6BC">
+    <div class="stage"><img src="gen/gift.jpg" alt="巨大的礼物盒打开，戴墨镜的小熊跳出来，小动物们搬着沙发和拖把走开"></div>
+    <div class="copy">
+      <h2 class="in" style="--d:.05" data-i="g1"></h2>
+      <p class="say in" style="--d:.2" data-i="g2"></p>
+      <div class="code-row in" style="--d:.38" id="puzzle" data-tap>
+        <span class="slot"><small>1</small><input class="cell px" id="c1" maxlength="2" autocomplete="off" autocapitalize="characters" aria-label="第 1 位"></span>
+        <span class="slot"><small>2</small><span class="cell fixed px">V</span></span>
+        <span class="slot"><small>3</small><input class="cell px" id="c3" maxlength="2" inputmode="numeric" autocomplete="off" aria-label="第 3 位"></span>
+        <span class="slot"><small>4</small><span class="cell fixed px">Q</span></span>
+        <span class="dash">-</span>
+        <span class="slot"><small>5</small><input class="cell px" id="c5" maxlength="2" inputmode="numeric" autocomplete="off" aria-label="第 5 位"></span>
+        <span class="slot"><small>6</small><input class="cell px" id="c6" maxlength="2" autocomplete="off" autocapitalize="characters" aria-label="第 6 位"></span>
+        <span class="slot"><small>7</small><input class="cell px" id="c7" maxlength="2" autocomplete="off" autocapitalize="characters" aria-label="第 7 位"></span>
+        <span class="slot"><small>8</small><span class="cell fixed px">T</span></span>
+      </div>
+      <ol class="clues in" style="--d:.45">
+        <li><b>1</b><span data-i="k1"></span></li><li><b>3</b><span data-i="k3"></span></li><li><b>5</b><span data-i="k5"></span></li>
+        <li><b>6</b><span data-i="k6"></span></li><li><b>7</b><span data-i="k7"></span></li>
+      </ol>
+      <div class="btnrow in" style="--d:.5"><button class="pbtn solid" type="button" id="copy" data-i="g3"></button><span class="toast" id="copied" aria-live="polite" style="margin:0"></span></div>
+      <p class="note in" style="--d:.55" data-i="pz2"></p>
+    </div>
+  </section>
+
+  <!-- end -->
+  <section class="slide dark" id="end" style="--sky:#322945">
+    <div class="stage"><img src="gen/cake.jpg" alt="小熊闭眼对着生日蛋糕许愿，兔子拿着礼炮">
+      <button class="bubble px pulse" id="cake" type="button" data-tap style="left:50%;top:70%" data-i="e3"></button>
+    </div>
+    <div class="copy">
+      <h2 class="in" style="--d:.05" id="end-title" data-i="e1"></h2>
+      <p class="say in" style="--d:.2" id="end-say" data-i="e2"></p>
+      <div id="wish" class="wish" hidden>
+        <p class="say" data-i="e5"></p>
+        <p class="sign" data-i="e6"></p>
+        <button class="pbtn px" type="button" id="again" data-i="e7"></button>
+      </div>
+    </div>
+  </section>
+
+  <canvas id="confetti" aria-hidden="true"></canvas>
+</div>
+
+<script>
+
+const T = {
+  tapme: ["点一下我", "Tap me"],
+  again: ["再点一下", "Tap again"],
+  photoHint: ["点照片翻下一张", "Tap for the next photo"],
+  start: ["点一下，开始", "Tap to start"],
+  navhint: ["点屏幕右边下一页，左边上一页", "Tap right for next, left to go back"],
+  times: ["遍", "times"],
+  p1k: ["熊宝宝的生日限定报告", "A birthday special for Dear Winnie"],
+  p1t: ["每天有每天的快乐", "Every day has its own joy"],
+  p1s: ["今天是生日快乐", "Today's is a happy birthday"],
+  p2k: ["2015 年 3 月", "March 2015"],
+  p2t: ["一只熊，<br>遇见了一只兔子", "A bear<br>met a bunny"],
+  p2s: ["那时候谁也想不到，身边人来人往，可我们还是我们。", "Nobody could have guessed it then. People came and went, and we stayed us."],
+  cheersBtn: ["点一下，碰个杯", "Tap to cheers"],
+  p3k: ["到今天，我们认识了", "As of today, we've known each other for"],
+  p3t: ["天，11 年零 8 个月", "days, 11 years and 8 months"],
+  p3s: ["这些年我们换过工作，换过住址，换过发型。但我们越来越近～", "We've changed jobs, homes and haircuts. And we just keep getting closer~"],
+  p4t: ["这 11 年，我们最常说的词是什么？", "What did we say most in 11 years?"],
+  p4s: ["我把聊天记录翻了个底朝天，但不得不说，这很咱俩。", "I dug through every single chat. Honestly, the answer is so us."],
+  p5k: ["年度热词第一名", "Word of the year, No.1"],
+  p5w: ["哈哈", "Haha"],
+  p5s: ["断层第一，遥遥领先。平均每天哈 0.8 次，剩下那 0.2 次的力气，留着骂老板。", "Miles ahead of everything else. 0.8 hahas a day on average, saving the other 0.2 for ranting about the boss."],
+  p5b: ["你也来哈一下", "Add a haha"],
+  p6k: ["第二名", "No.2"],
+  p6w: ["买", "Buy"],
+  p6s: ["是「吃饭」的 4.5 倍。会花钱才有赚钱的动力嘛～", "4.5 times more than “let's eat”. Spending is what keeps us motivated to earn, right?"],
+  p6b: ["加入购物车", "Add to cart"],
+  p7k: ["第三名", "No.3"],
+  p7w: ["笑发财了", "LOL"],
+  p7s: ["不是哈哈哈就是笑发财了，咱俩是没心没肺二人组。", "If it's not haha, it's LOL. We are the happy-go-lucky duo."],
+  p7b: ["点小熊，接财神", "Tap for more luck"],
+  p8t: ["老板 vs 宝宝", "Boss vs Babe"],
+  boss: ["老板", "Boss"], babe: ["宝宝", "Babe"],
+  p8s: ["提到老板的次数，是叫宝宝的快 3 倍。不是不爱你，是班味太重。", "We mention the boss almost 3 times as often as we say “babe”. It's not that I don't love you. Work just gets into everything."],
+  p8b: ["帮宝宝追分 +10", "Help Babe catch up +10"],
+  p9t: ["约了 77 次周末<br>吃成了 75 顿饭", "77 weekend plans<br>75 meals eaten"],
+  f1: ["说「周末」", "Said “weekend”"], f2: ["说「吃饭」", "Said “let's eat”"],
+  p9s: ["转化率 97%。做了这么多年 marketing，我投过的广告，没有一条打得过你。", "A 97% conversion rate. In all my years in marketing, not one ad I've run has beaten you."],
+  p10w: ["好的", "OK"],
+  p10s: ["其中 200 次是真的好，剩下 7 次是「好的（行吧）」。", "200 of them were a real OK. The other 7 were “OK (fine, whatever)”."],
+  p10b: ["点一下，盖个「好的」", "Tap to stamp an OK"],
+  p11t: ["这些年的我们", "Us, over the years"],
+  c11a: ["2019.10 我们一起吃烤肉", "2019.10 Korean BBQ together"],
+  c11b: ["2020.9 探店和喝酒是我们最爱的事情之一", "2020.9 New spots and drinks, one of our favourite things"],
+  p11s: ["烤肉的夹子永远在你手里。一杯 cocktail，一个什么都不用想的夜晚。", "The BBQ tongs were always in your hand. One cocktail, one night of thinking about nothing."],
+  c12a: ["2023.10 歌剧院吹着风", "2023.10 Breeze at the Opera House"],
+  c12b: ["2024.3 总是有很多喋喋不休", "2024.3 Always so much to chatter about"],
+  p12s: ["跟你聊的天都忘记了，但是还好这些身影都留了下来，以后我们要多拍照好吗？", "I've forgotten most of what we talked about, but at least these moments stayed. Let's take more photos from now on, okay?"],
+  p13t: ["2024 年 5 月，陪你试婚纱", "May 2024, trying on wedding dresses with you"],
+  c13a: ["这件？", "This one?"], c13b: ["还是这件？", "Or this one?"],
+  p13s: ["我终于体会到为什么看爱的人穿婚纱会哭了，看闺蜜试婚纱也会。你真的超级美。", "Now I get why people cry when someone they love puts on a wedding dress. Watching my best friend try them on does it too. You looked so beautiful."],
+  p14t: ["2024 年 8 月 29 日<br>Pellegrino 2000", "29 August 2024<br>Pellegrino 2000"],
+  c14a: ["笑到眼睛都没了", "Laughed till our eyes disappeared"], c14b: ["吃完去海边吹风", "Sea breeze after dinner"],
+  p14s: ["还记得那天的海风", "Remember the sea breeze that night?"],
+  c15a: ["2024.11 去年的蜡烛", "2024.11 Last year's candles"], c15b: ["2024.12 我们一起过圣诞", "2024.12 Christmas together"],
+  p15s: ["去年的蜡烛，今年又多一根。感谢大厨做的火腿，好吃！", "Last year's candles, plus one more this year. Thank you to the chef for the ham, it was delicious!"],
+  p16t: ["然后，你结婚了<br>我是伴娘", "Then you got married<br>and I was your bridesmaid"],
+  c16a: ["单身派对", "Hens party"], c16b: ["化好妆了", "Makeup done"], c16c: ["切蛋糕", "Cutting the cake"],
+  p16s: ["2025.2　单身派对、化妆、切蛋糕，每一步我都在旁边。那几天我比新娘还紧张。", "2025.2　Hens party, makeup, cutting the cake, I was by your side for every step. I was more nervous than the bride."],
+  c17a: ["表情管理下班", "Poker face off duty"], c17b: ["第一次去看橄榄球比赛", "Our first rugby match"], c17c: ["去年生日", "Last birthday"],
+  p17s: ["2025　婚后的你，表情管理彻底下班，我们是没头脑和不高兴～～～", "2025　Married life, and your poker face clocked off for good. We're Scatterbrain and Grumpy~~~"],
+  lvl: ["闯关拿礼物，第 {n} 关 / 5", "Quest for the gift, level {n} / 5"],
+  lock: ["先答题才能往下走哦。", "Answer first to move on."],
+  g1: ["恭喜通关！", "Level cleared!"],
+  g2: ["今年的礼物是一张 Airtasker 卡。搬家、装柜子、打扫、跑腿，统统交给别人，你只负责躺着。", "This year's gift is an Airtasker card. Moving, flat-pack furniture, cleaning, errands, hand it all off. Your only job is lying down."],
+  g3: ["复制卡号", "Copy code"],
+  k1: ["我女朋友英文名的第 2 个字母，大写", "The 2nd letter of my girlfriend's English name, in capitals"],
+  k3: ["你手机号的第 5 位数字", "The 5th digit of your phone number"],
+  k5: ["你手机号第 2 位加第 4 位的和", "Your phone number's 2nd digit plus its 4th digit"],
+  k6: ["你微信号里的第 2 个字母", "The 2nd letter of your WeChat ID"],
+  k7: ["你微信号里的第 3 个字母", "The 3rd letter of your WeChat ID"],
+  pzHint: ["把答案填进空格里", "Fill the blanks with your answers"],
+  pzDone: ["拼好啦！拿去 Airtasker 用吧", "Done! Off to Airtasker with it"],
+  pzFirst: ["先把空格都填满哦", "Fill in every blank first"],
+  pz2: ["猜不出来也没关系，卡也发到你邮箱啦。", "Can't crack it? No stress, the card is in your inbox too."],
+  copied: ["已复制", "Copied"],
+  e1: ["许个愿吧，熊宝宝", "Make a wish, Dear Winnie"],
+  e2: ["闭上眼睛数三下，再点蛋糕。", "Close your eyes, count to three, then tap the cake."],
+  e3: ["点我吹蜡烛", "Blow the candles"],
+  e4t: ["生日快乐，熊宝宝！", "Happy birthday, Dear Winnie!"], e4s: ["蜡烛吹灭了。", "Candles out."],
+  e5: ["下一个 11 年，还请多多指教。", "Here's to the next 11 years together."],
+  e6: ["你的兔子 Summer", "Your bunny, Summer"],
+  e7: ["再看一遍", "Watch again"]
+};
+const LINES = {
+  cover: [["吃块小蛋糕，人生步步高", "Have some cake, life only goes up from here"], ["让蜡烛代替所有灯", "Let the candles be the only lights tonight"],
+    ["往后余生，暴富是你，美丽是你，快乐也是你", "From now on, rich is you, pretty is you, happy is you"], ["每一岁都珍贵", "Every year of you is precious"],
+    ["钱途无量，吃嘛嘛香", "Endless money, and everything tastes great"], ["生日快乐！", "Happy birthday!"]],
+  cheers: [["好🍺不见", "Long time no beer"], ["富婆聚会 开心加倍！", "Rich girls' meetup, double the fun!"], ["叽叽喳喳 嘻嘻哈哈", "Chit-chat, giggle-giggle"], ["人类需要朋友 和 周末", "Humans need friends. And weekends."]],
+  cart: [["已加购，钱包发出一个问号", "Added. Your wallet sends a question mark"], ["再加一件，钱包喊救命", "One more. Your wallet is screaming for help"], ["钱包已老实，求放过", "Wallet has learned its lesson, please stop"], ["已清空购物车（骗你的）", "Cart emptied (just kidding)"]]
+};
+const QUIZ = [
+  { q: ["2015 年 4 月，你转给我的第一篇文章，讲的是什么？", "April 2015, what was the first article you ever sent me about?"],
+    o: [["一支 Chanel 口红", "A Chanel lipstick"], ["一块 Nomos 手表", "A Nomos watch"], ["一款 La Mer 面霜", "A La Mer cream"]], a: 1,
+    no: ["提示一下，跟时间有关。", "Hint: it has to do with time."], yes: ["Nomos。认识一个月，你就开始给我种草了。", "Nomos. One month in and you were already making me want things."] },
+  { q: ["如果我们是一个组合，你给我们起什么名字？", "If we were a duo, what would we be called?"],
+    o: [["哈哈二人组", "The Haha Duo"], ["没心没肺二人组", "The Happy-go-lucky Duo"], ["富婆预备役", "Future Rich Ladies Club"]], a: -1,
+    yes: ["好，就这么定了。明年继续营业。", "Decided. Open for business again next year."] },
+  { q: ["2020 年 3 月，你给我推荐了哪部剧？", "March 2020, which show did you tell me to watch?"],
+    o: [["《老友记》", "Friends"], ["《请回答 1988》", "Reply 1988"], ["《性爱自修室》", "Sex Education"]], a: 2,
+    no: ["你推荐的剧，比这个刺激多了。", "The show you picked was way spicier than that."], yes: ["对，就是这部。我收藏到现在。", "Yes, that one. Still saved."] },
+  { q: ["今年的生日愿望，你最想要哪一个？", "Which birthday wish do you want most this year?"],
+    o: [["暴富", "To get rich"], ["变美", "To get even prettier"], ["天天开心", "To be happy every day"]], a: -1,
+    yes: ["已登记，兔子负责帮你实现。", "Noted. The bunny will make it happen."] },
+  { q: ["下一个 11 年，你最想和我一起做什么？", "What do you most want to do with me in the next 11 years?"],
+    o: [["一起去旅行", "Travel together"], ["再看更多场球赛", "Watch more matches together"], ["一起慢慢变老", "Grow old together, slowly"]], a: -1,
+    yes: ["那就说好了。", "Then it's a deal."] }
+];
+
+let L = 0; /* 0 Chinese, 1 English */
+try { if (localStorage.getItem("bb-lang") === "en") L = 1; } catch (e) {}
+const t = k => (T[k] ? T[k][L] : "");
+const $ = id => document.getElementById(id);
+const phone = $("phone");
+const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* quiz slides go before the gift */
+QUIZ.forEach((item, qi) => {
+  const s = document.createElement("section");
+  s.className = "slide"; s.style.setProperty("--sky", "#DCDBFE"); s.dataset.quiz = qi;
+  s.innerHTML = '<div class="stage"><img src="gen/quiz.jpg" alt="兔子在小舞台上举着问号牌主持节目，小熊坐在台下"></div>' +
+    '<div class="copy"><p class="lvl in" style="--d:.05"></p><p class="q in" style="--d:.15"></p><div class="opts in" style="--d:.3"></div><p class="fb" aria-live="polite"></p></div>';
+  item.o.forEach((op, k) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "opt px"; b.id = "q" + qi + "o" + k;
+    b.addEventListener("click", () => answer(s, b, k));
+    s.querySelector(".opts").appendChild(b);
+  });
+  phone.insertBefore(s, $("gift"));
+});
+
+const slides = [...phone.querySelectorAll(".slide")];
+let cur = 0;
+const bar = $("bar");
+slides.forEach((s, k) => { const i = document.createElement("i"); i.title = (k + 1) + " / " + slides.length; bar.appendChild(i); });
+bar.setAttribute("data-tap", "");
+/* tap a segment of the progress bar to jump to that page; quiz pages still have to be answered on the way forward */
+bar.addEventListener("click", e => {
+  const k = [...bar.children].indexOf(e.target.closest("i")); if (k < 0) return;
+  if (k > cur) { for (let j = cur; j < k; j++) if (locked(j)) { go(j, true); const fb = slides[j].querySelector(".fb"); fb.dataset.k = "lock"; fb.textContent = t("lock"); fb.className = "fb no"; return; } }
+  go(k, true);
+});
+
+/* language */
+let coverI = -1, cheersI = -1, cartN = 0, myHaha = 0, lives = 227, baby = 61;
+function paint() {
+  document.documentElement.lang = L ? "en" : "zh";
+  phone.toggleAttribute("lang-en", !!L);
+  $("lang").textContent = L ? "中" : "EN";
+  document.querySelectorAll("[data-i]").forEach(el => { el.innerHTML = t(el.dataset.i); });
+  slides.forEach(s => {
+    if (s.dataset.quiz === undefined) return;
+    const qi = +s.dataset.quiz, item = QUIZ[qi];
+    s.querySelector(".lvl").textContent = t("lvl").replace("{n}", qi + 1);
+    s.querySelector(".q").textContent = item.q[L];
+    s.querySelectorAll(".opt").forEach((b, k) => b.textContent = item.o[k][L]);
+    const fb = s.querySelector(".fb");
+    if (s.dataset.solved) fb.textContent = item.yes[L]; else if (fb.dataset.k === "no") fb.textContent = item.no[L]; else if (fb.dataset.k === "lock") fb.textContent = t("lock");
+  });
+  if (coverI >= 0) $("cover-bubble").textContent = LINES.cover[coverI][L];
+  if (cheersI >= 0) $("cheers").textContent = LINES.cheers[cheersI][L];
+  if (cartN) $("cart-toast").textContent = LINES.cart[Math.min(cartN - 1, 3)][L];
+  if (myHaha) hahaToast();
+  if (lives > 227) $("angel").textContent = luckyText();
+  if (baby > 61) babyToast();
+  $("copied").textContent = puzzleFull() ? t("pzDone") : t("pzHint");
+  if ($("end").classList.contains("blown")) { $("end-title").textContent = t("e4t"); $("end-say").textContent = t("e4s"); $("cake").textContent = t("e4t"); }
+}
+$("lang").addEventListener("click", () => { L = 1 - L; try { localStorage.setItem("bb-lang", L ? "en" : "zh"); } catch (e) {} paint(); });
+
+function locked(n) { const s = slides[n]; return s && s.dataset.quiz !== undefined && !s.dataset.solved; }
+function go(n, force) {
+  if (n < 0 || n >= slides.length || n === cur) return;
+  if (!force && n > cur && locked(cur)) { const fb = slides[cur].querySelector(".fb"); fb.dataset.k = "lock"; fb.textContent = t("lock"); fb.className = "fb no"; return; }
+  const back = n < cur;
+  slides[cur].classList.remove("on"); slides[cur].classList.toggle("back", !back);
+  cur = n; slides[cur].classList.remove("back"); slides[cur].classList.add("on");
+  phone.style.background = getComputedStyle(slides[cur]).getPropertyValue("--sky") || "";
+  [...bar.children].forEach((el, k) => el.classList.toggle("done", k <= cur));
+  countUp(slides[cur]);
+  haha(slides[cur].hasAttribute("data-haha"));
+  stacks(slides[cur]);
+  if (slides[cur].id === "gift") confetti();
+  if (slides[cur].id === "end") birthdaySong(); else if (songOn) stopSong();
+}
+
+/* a pixel sparkle wherever the screen is touched */
+function sparkle(x, y) {
+  if (still) return;
+  const r = document.createElement("div"); r.className = "ripple"; r.style.left = x + "px"; r.style.top = y + "px";
+  const cols = ["#E2675A", "#7464E6", "#E3AE4A", "#3B2A3F"];
+  for (let k = 0; k < 8; k++) {
+    const a = k / 8 * Math.PI * 2, d = 24 + Math.random() * 10, dot = document.createElement("i");
+    dot.style.background = cols[k % cols.length];
+    dot.style.setProperty("--x", Math.round(Math.cos(a) * d / 4) * 4 + "px"); dot.style.setProperty("--y", Math.round(Math.sin(a) * d / 4) * 4 + "px");
+    r.appendChild(dot);
+  }
+  phone.appendChild(r); setTimeout(() => r.remove(), 650);
+}
+
+/* taps: left half goes back, right half goes forward; anything playable keeps its tap */
+phone.addEventListener("click", e => {
+  startMusic();
+  const r = phone.getBoundingClientRect();
+  sparkle(e.clientX - r.left, e.clientY - r.top);
+  if (e.target.closest("button, [data-tap]")) return;
+  go(e.clientX - r.left < r.width / 2 ? cur - 1 : cur + 1);
+});
+document.querySelectorAll("[data-go=next]").forEach(b => b.addEventListener("click", () => go(cur + 1)));
+let ty = null, tx = null, tTarget = null;
+phone.addEventListener("touchstart", e => { ty = e.touches[0].clientY; tx = e.touches[0].clientX; tTarget = e.target; }, { passive: true });
+phone.addEventListener("touchend", e => {
+  if (ty === null || (tTarget && tTarget.closest("#puzzle"))) { ty = null; return; }
+  const dy = e.changedTouches[0].clientY - ty, dx = e.changedTouches[0].clientX - tx; ty = null;
+  if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) go(dx < 0 ? cur + 1 : cur - 1);
+  else if (dy < -60) go(cur + 1); else if (dy > 60) go(cur - 1);
+});
+document.addEventListener("keydown", e => {
+  if (["ArrowRight", "ArrowDown", "PageDown"].includes(e.key)) go(cur + 1);
+  if (["ArrowLeft", "ArrowUp", "PageUp"].includes(e.key)) go(cur - 1);
+});
+function hop(el) { el.classList.remove("pulse", "hop"); void el.offsetWidth; el.classList.add("hop"); }
+/* a small "tap again" bubble that floats up off whatever was just tapped */
+function again(el, key) {
+  const r = el.getBoundingClientRect(), p = phone.getBoundingClientRect(), h = document.createElement("span");
+  h.className = "again-hint px"; h.textContent = t(key || "again");
+  h.style.left = Math.min(Math.max(r.left - p.left + r.width / 2, 70), p.width - 70) + "px"; h.style.top = (r.top - p.top - 8) + "px";
+  phone.appendChild(h); setTimeout(() => h.remove(), 1650);
+}
+
+$("cover-bubble").addEventListener("click", e => { coverI = (coverI + 1) % LINES.cover.length; e.currentTarget.textContent = LINES.cover[coverI][L]; hop(e.currentTarget); again(e.currentTarget); });
+$("cheers").addEventListener("click", e => { cheersI = (cheersI + 1) % LINES.cheers.length; e.currentTarget.textContent = LINES.cheers[cheersI][L]; hop(e.currentTarget); again(e.currentTarget); });
+
+/* 哈哈 bursts */
+function hahaToast() { $("haha-toast").textContent = myHaha < 5 ? (L ? "+" + myHaha + ", now " + (3491 + myHaha).toLocaleString("en-US") + " times" : "总数 +" + myHaha + "，现在是 " + (3491 + myHaha).toLocaleString("en-US") + " 遍") : (L ? "Okay okay hahahahaha" : "够了够了 哈哈哈哈哈哈"); }
+$("haha-btn").addEventListener("click", e => {
+  const r = phone.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, zone = $("haha-zone");
+  const words = L ? ["ha", "haha", "hahaha", "lol"] : ["哈", "哈哈", "哈哈哈", "哈哈哈哈"];
+  for (let k = 0; k < 8; k++) {
+    const sp = document.createElement("span"); sp.className = "boom";
+    sp.textContent = words[Math.floor(Math.random() * words.length)];
+    sp.style.left = x + "px"; sp.style.top = y + "px"; sp.style.fontSize = (16 + Math.random() * 12) + "px";
+    const a = Math.random() * Math.PI * 2, d = 80 + Math.random() * 90;
+    sp.style.setProperty("--x", Math.cos(a) * d + "px"); sp.style.setProperty("--y", Math.sin(a) * d + "px");
+    zone.appendChild(sp); setTimeout(() => sp.remove(), 1300);
+  }
+  myHaha++; hahaToast(); if (myHaha < 5) again(e.currentTarget);
+});
+
+$("cart-btn").addEventListener("click", e => { cartN++; $("cart-toast").textContent = LINES.cart[Math.min(cartN - 1, 3)][L]; if (cartN < 4) again(e.currentTarget); });
+
+function luckyText() { return L ? "Lucky again! No. " + lives : "又发财了，第 " + lives + " 次"; }
+/* gold coins and red envelopes drop through the scene */
+function coinRain() {
+  if (still) return;
+  const stg = $("lucky-stage");
+  for (let k = 0; k < 16; k++) {
+    const c = document.createElement("i"); c.className = Math.random() < .3 ? "coin env" : "coin";
+    c.style.left = (6 + Math.random() * 86) + "%"; c.style.top = (18 + Math.random() * 14) + "%";
+    c.style.animationDelay = (Math.random() * .5) + "s"; c.style.setProperty("--fall", (180 + Math.random() * 220) + "px");
+    stg.appendChild(c); setTimeout(() => c.remove(), 2200);
+  }
+}
+$("angel").addEventListener("click", e => { lives++; e.currentTarget.textContent = luckyText(); hop(e.currentTarget); again(e.currentTarget); coinRain(); });
+
+function babyToast() {
+  if (baby > 177) { $("baby-toast").textContent = L ? "Babe takes the lead! Less boss, more babe next year." : "宝宝反超！明年少提老板，多叫宝宝。"; $("baby-btn").textContent = L ? "Babe wins" : "宝宝赢了"; }
+  else $("baby-toast").textContent = L ? (178 - baby) + " to go" : "还差 " + (178 - baby) + " 次";
+}
+$("baby-btn").addEventListener("click", e => {
+  if (baby > 177) return;
+  baby += 10; $("baby-n").textContent = baby; babyToast();
+  if (baby > 177) confetti(); else again(e.currentTarget);
+});
+
+$("ok-btn").addEventListener("click", e => {
+  const st = document.createElement("div"), stg = $("ok-stage");
+  st.className = "stamp";
+  const odd = Math.random() < .2;
+  st.textContent = odd ? (L ? "FINE" : "行吧") : (L ? "OK" : "好的");
+  st.style.left = (8 + Math.random() * 64) + "%"; st.style.top = (40 + Math.random() * 45) + "%";
+  st.style.setProperty("--r", (-24 + Math.random() * 48) + "deg");
+  stg.appendChild(st); hop(e.currentTarget); again(e.currentTarget);
+});
+
+/* photo stacks: every photo shown whole at its own shape; the top one flies off to show the next */
+function sizeStack(st) {
+  const w = st.clientWidth, h = st.clientHeight;
+  st.querySelectorAll(".ph").forEach(f => {
+    const cap = f.querySelector("figcaption") ? 46 : 0;
+    f.style.setProperty("--mw", Math.round(w * .84) + "px"); f.style.setProperty("--mh", Math.max(140, Math.round(h - 34 - cap)) + "px");
+  });
+}
+function layStack(st) {
+  const figs = [...st.querySelectorAll(".ph")], i = +(st.dataset.i || 0), n = figs.length;
+  figs.forEach((f, k) => {
+    const d = (k - i + n) % n;
+    f.classList.remove("out"); f.style.zIndex = 20 - d; f.style.opacity = d > 2 ? 0 : 1;
+    f.style.setProperty("--r", d === 0 ? "-1.5deg" : (d % 2 ? 5 : -6) + "deg");
+    f.style.setProperty("--tx", d === 0 ? "0px" : (d % 2 ? 12 : -12) + "px");
+    f.style.setProperty("--ty", d * 5 + "px");
+  });
+  st.querySelector(".count").textContent = (i + 1) + " / " + n;
+}
+function nextPhoto(st) {
+  const figs = [...st.querySelectorAll(".ph")], i = +(st.dataset.i || 0);
+  if (figs[i].classList.contains("out")) return;
+  figs[i].classList.add("out");
+  setTimeout(() => { st.dataset.i = (i + 1) % figs.length; layStack(st); }, 430);
+}
+let stackTimer = null, hintTimer = null;
+function stacks(s) {
+  clearInterval(stackTimer); clearTimeout(hintTimer); stackTimer = null;
+  const st = s.querySelector(".stack"); if (!st) return;
+  sizeStack(st); layStack(st);
+  hintTimer = setTimeout(() => { if (slides[cur] === s) again(st.querySelector(".count"), "photoHint"); }, 1100);
+  if (!still) stackTimer = setInterval(() => nextPhoto(st), 3400);
+}
+document.querySelectorAll(".stack").forEach(st => {
+  sizeStack(st); layStack(st);
+  st.addEventListener("click", () => {
+    nextPhoto(st); again(st.querySelector(".count"));
+    clearInterval(stackTimer); if (!still) stackTimer = setInterval(() => nextPhoto(st), 4500);
+  });
+});
+addEventListener("resize", () => document.querySelectorAll(".stack").forEach(sizeStack));
+
+function answer(s, btn, k) {
+  const item = QUIZ[+s.dataset.quiz], fb = s.querySelector(".fb");
+  if (s.dataset.solved) return;
+  if (item.a === -1 || k === item.a) {
+    btn.classList.remove("no"); btn.classList.add("yes"); s.dataset.solved = "1";
+    fb.textContent = item.yes[L]; fb.className = "fb yes"; fb.dataset.k = "yes";
+    confettiSmall(btn);
+    setTimeout(() => { if (slides[cur] === s) go(cur + 1); }, 1700);
+  } else {
+    btn.classList.remove("no"); void btn.offsetWidth; btn.classList.add("no");
+    fb.textContent = item.no[L]; fb.className = "fb no"; fb.dataset.k = "no";
+    if (navigator.vibrate) try { navigator.vibrate(60); } catch (err) {}
+  }
+}
+
+/* code riddle */
+const cells = ["c1", "c3", "c5", "c6", "c7"].map($);
+function puzzleFull() { return cells.every(c => c.value); }
+function codeNow() { const v = id => $(id).value; return v("c1") + "V" + v("c3") + "Q-" + v("c5") + v("c6") + v("c7") + "T"; }
+let cracked = false;
+cells.forEach((c, k) => {
+  c.addEventListener("input", () => {
+    c.value = c.value.toUpperCase().slice(-1);
+    if (c.value && cells[k + 1]) cells[k + 1].focus();
+    $("copied").textContent = puzzleFull() ? t("pzDone") : t("pzHint");
+    if (puzzleFull() && !cracked) { cracked = true; confetti(); }
+  });
+  c.addEventListener("keydown", e => { e.stopPropagation(); if (e.key === "Backspace" && !c.value && cells[k - 1]) cells[k - 1].focus(); });
+});
+$("copy").addEventListener("click", () => {
+  if (!puzzleFull()) { $("copied").textContent = t("pzFirst"); return; }
+  const code = codeNow(), done = () => { $("copied").textContent = t("copied"); }, show = () => { $("copied").textContent = code; };
+  try { navigator.clipboard.writeText(code).then(done, show); } catch (err) { show(); }
+});
+
+/* cake */
+$("cake").addEventListener("click", e => {
+  const end = $("end"); if (end.classList.contains("blown")) return;
+  end.classList.add("blown");
+  $("end-title").textContent = t("e4t"); $("end-say").textContent = t("e4s");
+  e.currentTarget.textContent = t("e4t"); e.currentTarget.classList.remove("pulse");
+  $("wish").hidden = false; confetti();
+});
+$("again").addEventListener("click", () => go(0, true));
+
+/* numbers rest at their final value and count up when their page opens */
+function countUp(s) {
+  if (still) return;
+  s.querySelectorAll("[data-count]").forEach(el => {
+    const end = +el.dataset.count, suf = el.dataset.suffix || "", t0 = performance.now();
+    (function step(tm) {
+      const p = Math.min(1, (tm - t0) / 1200), v = Math.round(end * (1 - Math.pow(1 - p, 3)));
+      el.textContent = v.toLocaleString("en-US") + suf;
+      if (p < 1 && slides[cur] === s) requestAnimationFrame(step); else el.textContent = end.toLocaleString("en-US") + suf;
+    })(t0);
+  });
+}
+
+let hahaTimer = null;
+function haha(on) {
+  clearInterval(hahaTimer); hahaTimer = null;
+  const zone = $("haha-zone"); zone.querySelectorAll("span:not(.boom)").forEach(x => x.remove());
+  if (!on || still) return;
+  hahaTimer = setInterval(() => {
+    const words = L ? ["haha", "hahaha", "lol", "ha"] : ["哈哈", "哈哈哈", "哈哈哈哈", "哈"];
+    const sp = document.createElement("span"); sp.textContent = words[Math.floor(Math.random() * words.length)];
+    sp.style.left = (5 + Math.random() * 70) + "%"; sp.style.fontSize = (16 + Math.random() * 12) + "px";
+    zone.appendChild(sp); setTimeout(() => sp.remove(), 4700);
+  }, 650);
+}
+
+function confetti(origin) {
+  if (still) return;
+  const c = $("confetti"), ctx = c.getContext("2d"), W = phone.clientWidth, H = phone.clientHeight, dpr = devicePixelRatio || 1;
+  c.width = W * dpr; c.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const cols = ["#E2675A", "#7464E6", "#E3AE4A", "#9FD3B5", "#F6B8C8", "#FFFDF8"];
+  const many = origin ? 40 : 120;
+  const bits = Array.from({ length: many }, () => origin
+    ? { x: origin[0], y: origin[1], vx: -4 + Math.random() * 8, vy: -6 - Math.random() * 4, s: 4 + Math.round(Math.random()) * 4, col: cols[Math.floor(Math.random() * cols.length)] }
+    : { x: Math.random() * W, y: -20 - Math.random() * H * .5, vx: -1 + Math.random() * 2, vy: 2 + Math.random() * 3, s: 4 + Math.round(Math.random() * 2) * 2, col: cols[Math.floor(Math.random() * cols.length)] });
+  const t0 = performance.now();
+  (function f(tm) {
+    ctx.clearRect(0, 0, W, H);
+    bits.forEach(b => { b.x += b.vx; b.y += b.vy; if (origin) b.vy += .35; ctx.fillStyle = b.col; ctx.fillRect(Math.round(b.x / 2) * 2, Math.round(b.y / 2) * 2, b.s, b.s); });
+    if (tm - t0 < (origin ? 1600 : 4200)) requestAnimationFrame(f); else ctx.clearRect(0, 0, W, H);
+  })(t0);
+}
+function confettiSmall(el) { const r = el.getBoundingClientRect(), p = phone.getBoundingClientRect(); confetti([r.left - p.left + r.width / 2, r.top - p.top]); }
+
+/* music: a soft original piano loop made in the browser, and Happy Birthday (public domain) as a music box on the wish page */
+let actx = null, master = null, bgBus = null, musicOn = true, bgNext = 0, bgBar = 0, bgTimer = null, songOn = false;
+try { if (localStorage.getItem("bb-music") === "off") musicOn = false; } catch (e) {}
+const hz = m => 440 * Math.pow(2, (m - 69) / 12);
+function audio() {
+  if (!actx) {
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null;
+    actx = new AC(); master = actx.createGain(); master.gain.value = musicOn ? .9 : 0;
+    const verb = actx.createConvolver(), len = actx.sampleRate * 2.2, ir = actx.createBuffer(2, len, actx.sampleRate);
+    for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3); }
+    verb.buffer = ir; const wet = actx.createGain(); wet.gain.value = .28;
+    master.connect(actx.destination); master.connect(verb); verb.connect(wet); wet.connect(actx.destination);
+    bgBus = actx.createGain(); bgBus.gain.value = .5; bgBus.connect(master);
+  }
+  if (actx.state === "suspended") actx.resume();
+  return actx;
+}
+function piano(m, t, dur, vel, bus, box) {
+  const g = actx.createGain(), f = hz(m);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vel, t + .008); g.gain.exponentialRampToValueAtTime(.0008, t + dur);
+  g.connect(bus);
+  [[1, 1], [2, box ? .5 : .32], [3, box ? .25 : .1], [4, box ? .12 : .04]].forEach(([h, a]) => {
+    const o = actx.createOscillator(), og = actx.createGain(); o.type = "sine"; o.frequency.value = f * h; og.gain.value = a;
+    o.connect(og); og.connect(g); o.start(t); o.stop(t + dur + .05);
+  });
+}
+const BARS = [
+  { c: [53, 57, 60, 64], m: [[69, 0, 2], [72, 2, 1], [76, 3, 1]] }, { c: [52, 55, 59, 62], m: [[74, 0, 3], [71, 3, 1]] },
+  { c: [50, 53, 57, 60], m: [[72, 0, 1], [69, 1, 2], [65, 3, 1]] }, { c: [55, 59, 62, 65], m: [[67, 0, 4]] },
+  { c: [48, 52, 55, 59], m: [[76, 0, 2], [74, 2, 1], [71, 3, 1]] }, { c: [45, 52, 55, 60], m: [[72, 0, 3], [76, 3, 1]] },
+  { c: [50, 53, 57, 60], m: [[77, 0, 2], [76, 2, 1], [72, 3, 1]] }, { c: [43, 50, 55, 59], m: [[74, 0, 4]] }
+];
+const BEAT = 60 / 72;
+function scheduleBg() {
+  if (!actx || songOn) return;
+  while (bgNext < actx.currentTime + 1.2) {
+    const b = BARS[bgBar % BARS.length], t0 = bgNext;
+    [0, 1, 2, 3, 2, 1, 2, 3].forEach((k, i) => piano(b.c[k] + (i > 3 ? 12 : 0), t0 + i * BEAT / 2, 1.6, i === 0 ? .1 : .055, bgBus));
+    b.m.forEach(([m, at, len]) => piano(m, t0 + at * BEAT, len * BEAT + 1, .085, bgBus));
+    bgNext += 4 * BEAT; bgBar++;
+  }
+}
+function startMusic() {
+  if (!musicOn || !audio() || bgTimer || songOn) return;
+  bgNext = actx.currentTime + .1; bgBus.gain.cancelScheduledValues(actx.currentTime); bgBus.gain.setTargetAtTime(.5, actx.currentTime, .4);
+  scheduleBg(); bgTimer = setInterval(scheduleBg, 250);
+}
+function stopBg() { clearInterval(bgTimer); bgTimer = null; if (actx) bgBus.gain.setTargetAtTime(0, actx.currentTime, .3); }
+let songBus = null;
+function birthdaySong() {
+  if (!musicOn || !audio()) return;
+  stopBg(); songOn = true;
+  if (songBus) songBus.disconnect();
+  songBus = actx.createGain(); songBus.gain.value = .9; songBus.connect(master);
+  const tune = [[67, .75], [67, .25], [69, 1], [67, 1], [72, 1], [71, 2], [67, .75], [67, .25], [69, 1], [67, 1], [74, 1], [72, 2],
+    [67, .75], [67, .25], [79, 1], [76, 1], [72, 1], [71, 1], [69, 2], [77, .75], [77, .25], [76, 1], [72, 1], [74, 1], [72, 3]];
+  const bass = { 2: 48, 5: 43, 9: 43, 11: 48, 14: 48, 17: 53, 21: 48, 23: 43, 24: 48 };
+  const beat = 60 / 108; let t = actx.currentTime + .6;
+  tune.forEach(([m, d], i) => { piano(m, t, Math.max(d * beat + .8, 1), .16, songBus, true); if (bass[i]) piano(bass[i], t, 2.2, .07, songBus); t += d * beat; });
+  setTimeout(() => { if (songOn) { songOn = false; startMusic(); } }, (t - actx.currentTime + 1.5) * 1000);
+}
+function stopSong() { songOn = false; if (songBus && actx) songBus.gain.setTargetAtTime(0, actx.currentTime, .15); startMusic(); }
+function paintMusic() { $("music").classList.toggle("off", !musicOn); }
+$("music").addEventListener("click", () => {
+  musicOn = !musicOn; try { localStorage.setItem("bb-music", musicOn ? "on" : "off"); } catch (e) {}
+  paintMusic(); audio();
+  if (actx) master.gain.setTargetAtTime(musicOn ? .9 : 0, actx.currentTime, .1);
+  if (musicOn) { if (slides[cur].id === "end") birthdaySong(); else startMusic(); }
+});
+paintMusic();
+
+/* open on the cover, or on #sN when a page is linked directly */
+paint();
+slides[0].classList.add("on"); bar.children[0].classList.add("done");
+const m = /^#s(\d+)$/.exec(location.hash);
+if (m) go(Math.min(+m[1], slides.length - 1), true);
+</script>
+
+</body>
+</html>
